@@ -3,8 +3,12 @@ from pydantic import BaseModel
 from typing import List, Optional
 from sentence_transformers import SentenceTransformer, util
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
+
 
 app = FastAPI()
+load_dotenv()
 
 app.add_middleware(
         CORSMiddleware,
@@ -29,6 +33,7 @@ class Post(BaseModel):
     type: str
 
 class SearchRequest(BaseModel):
+    ApiKey: str
     prompt: str
     posts: List[Post]
 
@@ -44,6 +49,9 @@ def search_posts(data: SearchRequest):
 
     if not posts:
         return {"message": "No posts provided", "results": []}
+    
+    if data.ApiKey != os.getenv("PREMIUM_API_KEY"):
+        return {"message":0}
 
     def flatten(post: Post):
         routine_text = " ".join([f"{r.time} {r.content}" for r in post.routines]) if post.routines else ""
