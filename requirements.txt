@@ -10,3 +10,4 @@ scipy
 requests
 tf-keras
 dotenv
+textblob
