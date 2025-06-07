@@ -5,7 +5,6 @@ from sentence_transformers import SentenceTransformer, util
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-from textblob import TextBlob
 
 app = FastAPI()
 load_dotenv()
@@ -52,16 +51,11 @@ def search_posts(data: SearchRequest):
     
     if data.ApiKey != os.getenv("PREMIUM_API_KEY"):
         return {"message":0}
-    
-    def correct_spelling(text:str)->str:
-        return str(TextBlob(text).correct())
 
     def flatten(post: Post):
         routine_text = " ".join([f"{r.time} {r.content}" for r in post.routines]) if post.routines else ""
         filters_text = " ".join(post.filters)
-        combined_text = f"{post.title} {post.description} {routine_text} {filters_text} {post.type}"
-        corrected_text = correct_spelling(combined_text)
-        return corrected_text
+        return f"{post.title} {post.description} {routine_text} {filters_text} {post.type}"
 
     flattened_posts = [flatten(post) for post in posts]
     post_embeddings = model.encode(flattened_posts, convert_to_tensor=True)
