@@ -5,6 +5,7 @@ from sentence_transformers import SentenceTransformer, util
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+from textblob import TextBlob
 
 app = FastAPI()
 load_dotenv()
@@ -35,6 +36,9 @@ class SearchRequest(BaseModel):
     ApiKey: str
     prompt: str
     posts: List[Post]
+    
+def correct_spelling(text:str):
+    return str(TextBlob(text).correct())
 
 @app.get("/")
 async def root():
@@ -43,7 +47,7 @@ async def root():
 
 @app.post("/search")
 def search_posts(data: SearchRequest):
-    prompt = data.prompt
+    prompt = correct_spelling(data.prompt)
     posts = data.posts
 
     if not posts:
